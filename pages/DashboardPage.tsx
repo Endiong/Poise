@@ -51,15 +51,26 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
-  const { user, updateUserProfile, updatePassword, refreshUser } = useAuth();
+  const { user, updateUserProfile, updateUserMetadata, updatePassword, refreshUser } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>('home');
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Load theme from user_metadata or localStorage
+    if (user?.user_metadata?.theme) {
+      return user.user_metadata.theme as Theme;
+    }
+    return 'light';
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   
-  // Layout Preference State
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => loadState(LAYOUT_PREF_KEY) || 'sidebar');
+  // Layout Preference State - Load from user_metadata first
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
+    if (user?.user_metadata?.nav_layout) {
+      return user.user_metadata.nav_layout as LayoutMode;
+    }
+    return 'sidebar';
+  });
 
   const [profile, setProfile] = useState<UserProfile>(() => {
     // Use Supabase user data if available, otherwise fall back to localStorage
@@ -129,14 +140,25 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     loadSessions();
   }, [user]);
 
-  // Sync profile with user metadata when user changes (e.g., after profile update)
+  // Sync profile, theme, and layout with user metadata when user changes
   useEffect(() => {
     if (user) {
+      // Update profile
       setProfile({
         name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
         avatar: user.user_metadata?.avatar_url || '',
         email: user.email || ''
       });
+      
+      // Update theme if it exists in metadata
+      if (user.user_metadata?.theme) {
+        setTheme(user.user_metadata.theme as Theme);
+      }
+      
+      // Update layout if it exists in metadata
+      if (user.user_metadata?.nav_layout) {
+        setLayoutMode(user.user_metadata.nav_layout as LayoutMode);
+      }
     }
   }, [user]);
 
@@ -271,9 +293,22 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     confirmPassword?: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
+      // Prepare metadata updates
+      const metadataUpdates: Record<string, any> = {};
+      
       // Update name in auth user metadata (persists across logins)
       if (newProfile.name !== profile.name) {
-        const { error: authError } = await updateUserProfile(newProfile.name);
+        metadataUpdates.full_name = newProfile.name;
+      }
+
+      // Update avatar in auth user metadata if changed
+      if (newProfile.avatar !== profile.avatar) {
+        metadataUpdates.avatar_url = newProfile.avatar;
+      }
+
+      // Update metadata if there are changes
+      if (Object.keys(metadataUpdates).length > 0 && updateUserMetadata) {
+        const { error: authError } = await updateUserMetadata(metadataUpdates);
         if (authError) {
           return { success: false, error: authError.message };
         }
@@ -313,9 +348,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
       saveState(FOCUS_AREA_STORAGE_KEY, level);
   }
 
-  const handleUpdateLayout = (mode: LayoutMode) => {
+  const handleUpdateLayout = async (mode: LayoutMode) => {
       setLayoutMode(mode);
       saveState(LAYOUT_PREF_KEY, mode);
+      // Save to user_metadata
+      if (user && updateUserMetadata) {
+        await updateUserMetadata({ nav_layout: mode });
+      }
   };
 
   const handleCompleteOnboarding = () => {
@@ -344,8 +383,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     };
   }, []);
 
-  const toggleTheme = () => {
-      setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const toggleTheme = async () => {
+      const newTheme = theme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+      // Save theme to user_metadata
+      if (user && updateUserMetadata) {
+        await updateUserMetadata({ theme: newTheme });
+      }
   };
 
   // NEW: Calculate Weekly Time Tracked
@@ -665,8 +709,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                           }
                       `}
                   >
-                      <span className={`w-5 h-5 ${activeView === item.id ? '' : 'opacity-70'}`}>{item.icon}</span>
-                      {item.label}
+                      <span className={`w-5 h-5 flex-shrink-0 ${activeView === item.id ? '' : 'opacity-70'}`}>{item.icon}</span>
+                      <span>{item.label}</span>
                   </button>
               ))}
 
@@ -681,8 +725,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                       }
                   `}
               >
-                  <span className={`w-5 h-5 ${activeView === 'support' ? '' : 'opacity-70'}`}><HeadphonesIcon /></span>
-                  Support
+                  <span className={`w-5 h-5 flex-shrink-0 ${activeView === 'support' ? '' : 'opacity-70'}`}><HeadphonesIcon /></span>
+                  <span>Support</span>
               </button>
 
               <div className="mt-auto pt-4">
@@ -766,9 +810,10 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                                           : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800/50'
                                       }
                                   `}
+                                  title={item.label}
                               >
                                   <span className="flex items-center justify-center w-4 h-4">{item.icon}</span>
-                                  <span className="text-xs font-bold leading-none mt-0.5">{item.label}</span>
+                                  <span className="text-xs font-bold leading-none mt-0.5 hidden xl:inline">{item.label}</span>
                               </button>
                           ))}
                       </nav>

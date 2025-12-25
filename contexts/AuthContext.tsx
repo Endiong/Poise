@@ -11,6 +11,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
   updateUserProfile: (fullName: string) => Promise<{ error: AuthError | null }>;
+  updateUserMetadata: (metadata: Record<string, any>) => Promise<{ error: AuthError | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   clearNewUserFlag: () => void;
@@ -112,6 +113,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   }, []);
 
+  const updateUserMetadata = useCallback(async (metadata: Record<string, any>) => {
+    const { error } = await supabase.auth.updateUser({
+      data: metadata,
+    });
+
+    if (!error) {
+      // Refresh the user object to get updated metadata
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+
+    return { error };
+  }, []);
+
   const updatePassword = useCallback(async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
@@ -145,6 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithEmail,
     signUpWithEmail,
     updateUserProfile,
+    updateUserMetadata,
     updatePassword,
     signOut,
     clearNewUserFlag,
