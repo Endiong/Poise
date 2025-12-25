@@ -51,7 +51,7 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
-  const { user } = useAuth();
+  const { user, updateUserProfile, updatePassword, refreshUser } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>('home');
   const [theme, setTheme] = useState<Theme>('light');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -127,6 +127,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     };
     
     loadSessions();
+  }, [user]);
+
+  // Sync profile with user metadata when user changes (e.g., after profile update)
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        avatar: user.user_metadata?.avatar_url || '',
+        email: user.email || ''
+      });
+    }
   }, [user]);
 
   // Helper to check for new badges based on updated history
@@ -254,9 +265,37 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     }
   };
 
-  const handleUpdateProfile = (newProfile: UserProfile) => {
+  const handleUpdateProfile = async (
+    newProfile: UserProfile, 
+    password?: string, 
+    confirmPassword?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Update name in auth user metadata (persists across logins)
+      if (newProfile.name !== profile.name) {
+        const { error: authError } = await updateUserProfile(newProfile.name);
+        if (authError) {
+          return { success: false, error: authError.message };
+        }
+      }
+
+      // Update password if provided
+      if (password && confirmPassword && password === confirmPassword) {
+        const { error: passwordError } = await updatePassword(password);
+        if (passwordError) {
+          return { success: false, error: passwordError.message };
+        }
+      }
+
+      // Update local state
       setProfile(newProfile);
       saveState(USER_PROFILE_KEY, newProfile);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Profile update error:', error);
+      return { success: false, error: 'An unexpected error occurred' };
+    }
   };
 
   const handleSetGoal = (newGoal: number) => {

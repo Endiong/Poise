@@ -10,24 +10,57 @@ interface UserProfile {
 
 interface SettingsViewProps {
   profile: UserProfile;
-  onUpdateProfile: (newProfile: UserProfile) => void;
+  onUpdateProfile: (newProfile: UserProfile, password?: string, confirmPassword?: string) => Promise<{ success: boolean; error?: string }>;
   layoutMode: LayoutMode;
   onUpdateLayout: (mode: LayoutMode) => void;
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({ profile, onUpdateProfile, layoutMode, onUpdateLayout }) => {
   const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email || 'margaret@example.com');
+  const [email, setEmail] = useState(profile.email || '');
   const [avatar, setAvatar] = useState(profile.avatar);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateProfile({ name, avatar, email });
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
+    setError(null);
+    setIsSaving(true);
+
+    // Validate password if provided
+    if (password || confirmPassword) {
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters');
+        setIsSaving(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    const result = await onUpdateProfile(
+      { name, avatar, email },
+      password || undefined,
+      confirmPassword || undefined
+    );
+
+    setIsSaving(false);
+
+    if (result.success) {
+      setIsSaved(true);
+      // Clear password fields after successful save
+      setPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setIsSaved(false), 2000);
+    } else {
+      setError(result.error || 'Failed to update profile');
+    }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,6 +215,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({ profile, onUpdateProfile, l
              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                  <LockClosedIcon /> Security
              </h3>
+             <p className="text-sm text-gray-500 mb-4">
+                 Leave password fields empty if you don't want to change your password. Minimum 6 characters required.
+             </p>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
@@ -206,17 +242,26 @@ const SettingsView: React.FC<SettingsViewProps> = ({ profile, onUpdateProfile, l
              </div>
          </div>
 
+         {/* Error Display */}
+         {error && (
+             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                 <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+             </div>
+         )}
+
          <div className="flex justify-end gap-4">
              <button 
                 type="submit"
-                disabled={isSaved}
+                disabled={isSaved || isSaving}
                 className={`px-8 py-2.5 rounded-full font-bold transition-all shadow-lg flex items-center gap-2 ${
                     isSaved 
                     ? 'bg-green-500 text-white hover:bg-green-600 scale-105' 
-                    : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                    : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80 disabled:opacity-50'
                 }`}
              >
-                {isSaved ? (
+                {isSaving ? (
+                    "Saving..."
+                ) : isSaved ? (
                     <>
                         <CheckCircleIcon className="w-5 h-5" /> Saved!
                     </>

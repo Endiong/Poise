@@ -10,8 +10,11 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  updateUserProfile: (fullName: string) => Promise<{ error: AuthError | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   clearNewUserFlag: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -93,6 +96,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   }, []);
 
+  const updateUserProfile = useCallback(async (fullName: string) => {
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        full_name: fullName,
+      },
+    });
+
+    if (!error) {
+      // Refresh the user object to get updated metadata
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+
+    return { error };
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    return { error };
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -112,8 +144,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
+    updateUserProfile,
+    updatePassword,
     signOut,
     clearNewUserFlag,
+    refreshUser,
   };
 
   return (
