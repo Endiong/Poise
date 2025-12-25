@@ -8,12 +8,12 @@ export const PoiséIcon = ({className = "w-8 h-8", style}: {className?: string, 
     viewBox="0 0 93 58" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
-    className={`${className} poise-logo`} 
+    className={`${className} poise-logo transition-all duration-300 hover:scale-110`} 
     style={style}
   >
-    <path d="M46.4354 0C20.7874 0 -0.00671193 21.1902 1.62519e-06 47.3216H11.8629C11.8629 27.7382 27.219 11.8606 46.4354 11.8606C65.6519 11.8606 81.008 27.7382 81.008 47.3216H92.8708C92.8753 21.1902 72.0812 0 46.4354 0Z" fill="currentColor"/>
-    <path className="poise-eye" d="M44.4494 47.2872C44.4494 44.4491 43.322 41.7271 41.3151 39.7203C39.3082 37.7134 36.5863 36.5859 33.7482 36.5859C30.91 36.5859 28.1881 37.7134 26.1812 39.7203C24.1743 41.7271 23.0469 44.4491 23.0469 47.2872L33.7482 47.2872H44.4494Z" fill="currentColor"/>
-    <path className="poise-eye" d="M69.7893 47.2872C69.7893 44.4491 68.6618 41.7271 66.6549 39.7203C64.6481 37.7134 61.9262 36.5859 59.088 36.5859C56.2498 36.5859 53.5279 37.7134 51.5211 39.7203C49.5142 41.7271 48.3867 44.4491 48.3867 47.2872L59.088 47.2872H69.7893Z" fill="currentColor"/>
+    <path className="transition-all duration-300" d="M46.4354 0C20.7874 0 -0.00671193 21.1902 1.62519e-06 47.3216H11.8629C11.8629 27.7382 27.219 11.8606 46.4354 11.8606C65.6519 11.8606 81.008 27.7382 81.008 47.3216H92.8708C92.8753 21.1902 72.0812 0 46.4354 0Z" fill="currentColor"/>
+    <path className="poise-eye transition-all duration-500 hover:animate-pulse" d="M44.4494 47.2872C44.4494 44.4491 43.322 41.7271 41.3151 39.7203C39.3082 37.7134 36.5863 36.5859 33.7482 36.5859C30.91 36.5859 28.1881 37.7134 26.1812 39.7203C24.1743 41.7271 23.0469 44.4491 23.0469 47.2872L33.7482 47.2872H44.4494Z" fill="currentColor"/>
+    <path className="poise-eye transition-all duration-500 hover:animate-pulse" d="M69.7893 47.2872C69.7893 44.4491 68.6618 41.7271 66.6549 39.7203C64.6481 37.7134 61.9262 36.5859 59.088 36.5859C56.2498 36.5859 53.5279 37.7134 51.5211 39.7203C49.5142 41.7271 48.3867 44.4491 48.3867 47.2872L59.088 47.2872H69.7893Z" fill="currentColor"/>
   </svg>
 );
 
@@ -177,9 +177,13 @@ export const MinusIcon = ({ className = "h-6 w-6" }: { className?: string }) => 
 );
 
 export const SettingsIcon = ({ className = "h-6 w-6" }: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-    <circle cx="12" cy="12" r="3" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-500 hover:rotate-180 group`}>
+    <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <circle className="transition-all duration-500 group-hover:fill-current" cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <circle className="transition-all duration-400 group-hover:r-2.5" cx="16" cy="8" r="1.5" fill="currentColor"/>
+    <circle className="transition-all duration-600 group-hover:fill-current" cx="8" cy="16" r="1.5" fill="currentColor"/>
+    <circle className="transition-all duration-300 group-hover:r-2.5 group-hover:animate-pulse" cx="16" cy="16" r="2" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.3"/>
+    <path className="transition-all duration-500 group-hover:translate-x-1" d="M7 12h10M12 7v10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -217,9 +221,10 @@ export const LoaderIcon = ({ className = "w-5 h-5" }: { className?: string }) =>
 );
 
 export const HomeIcon = ({className = "w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:-translate-y-1 group`}>
+    <path className="transition-all duration-300 group-hover:fill-current" fill="currentColor" fillOpacity="0.2" d="M12 3L4 9v12a1 1 0 001 1h4v-7a1 1 0 011-1h4a1 1 0 011 1v7h4a1 1 0 001-1V9l-8-6z"/>
+    <path className="transition-all duration-300" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 10l9-7 9 7M9 22v-8h6v8"/>
+    <circle className="transition-all duration-500 group-hover:r-1.5" cx="12" cy="2" r="0" fill="currentColor"/>
   </svg>
 );
 
@@ -231,22 +236,23 @@ export const CameraIcon = ({className = "w-5 h-5"}: {className?: string}) => (
 );
 
 export const TrophyIcon = ({className = "w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-    <path d="M4 22h16" />
-    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-500 hover:scale-125 hover:rotate-12 group`}>
+    <circle className="transition-all duration-700 group-hover:fill-yellow-400 group-hover:fill-opacity-30" cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2.5" fill="none"/>
+    <circle className="transition-all duration-500 group-hover:r-4" cx="12" cy="12" r="5" fill="currentColor" fillOpacity="0.15"/>
+    <path className="transition-all duration-300 group-hover:translate-y-1" d="M12 2L13.5 3.5L12 5L10.5 3.5L12 2z" fill="currentColor"/>
+    <path className="transition-all duration-300 group-hover:translate-y-1" d="M12 19L13.5 20.5L12 22L10.5 20.5L12 19z" fill="currentColor"/>
+    <text x="12" y="14" textAnchor="middle" className="text-xs font-bold transition-all duration-300 group-hover:fill-yellow-600" fill="currentColor">★</text>
   </svg>
 );
 
 export const ChartBarSquareIcon = ({className = "w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-    <line x1="8" x2="8" y1="17" y2="12" />
-    <line x1="12" x2="12" y1="17" y2="10" />
-    <line x1="16" x2="16" y1="17" y2="7" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 group`}>
+    <path className="transition-all duration-700 group-hover:translate-y-1 group-hover:opacity-30" d="M3 18 Q6 15, 9 16 T15 14 T21 17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    <path className="transition-all duration-500 group-hover:translate-y-0.5" d="M3 12 Q6 9, 9 10 T15 8 T21 11" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    <path className="transition-all duration-300" d="M3 6 Q6 3, 9 4 T15 2 T21 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    <circle className="transition-all duration-300 group-hover:r-1.5 group-hover:fill-blue-500" cx="21" cy="5" r="1" fill="currentColor"/>
+    <circle className="transition-all duration-500 group-hover:r-1.5 group-hover:fill-green-500" cx="21" cy="11" r="1" fill="currentColor"/>
+    <circle className="transition-all duration-700 group-hover:r-1.5 group-hover:fill-purple-500" cx="21" cy="17" r="1" fill="currentColor"/>
   </svg>
 );
 
@@ -267,23 +273,30 @@ export const InfoCircleIcon = ({className = "w-5 h-5"}: {className?: string}) =>
 );
 
 export const ThumbsUpIcon = ({className = "w-6 h-6"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M7 10v12" />
-    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:rotate-6 group`}>
+    <circle className="transition-all duration-500 group-hover:fill-green-500 group-hover:fill-opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path className="transition-all duration-700 group-hover:stroke-green-500 group-hover:stroke-dashoffset-0" d="M8 12l3 3 5-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="12" strokeDashoffset="12"/>
+    <circle className="transition-all duration-500 group-hover:r-11 group-hover:animate-ping" cx="12" cy="12" r="0" stroke="#10B981" strokeWidth="2" fill="none" opacity="0.3"/>
+    <path className="transition-all duration-300 group-hover:opacity-100" opacity="0" d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5l1.5 1.5M6 18l1.5-1.5M16.5 7.5l1.5-1.5" stroke="#10B981" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
 export const ClockIcon = ({className = "w-6 h-6"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 group`}>
+    <circle className="transition-all duration-500 group-hover:stroke-blue-500" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path className="transition-all duration-700 group-hover:stroke-dashoffset-0" d="M12 12L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="8" strokeDashoffset="8"/>
+    <circle className="transition-all duration-300 group-hover:r-8 group-hover:opacity-20" cx="12" cy="12" r="0" fill="#3B82F6" opacity="0"/>
+    <path className="transition-all duration-500 group-hover:opacity-100 group-hover:rotate-90" style={{transformOrigin: '12px 12px'}} opacity="0.3" d="M12 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle className="transition-all duration-700 group-hover:animate-ping" cx="12" cy="12" r="2" fill="currentColor"/>
   </svg>
 );
 
 export const CheckBadgeIcon = ({className = "w-6 h-6"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78" />
-    <path d="m9 12 2 2 4-4" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:-rotate-6 group`}>
+    <path className="transition-all duration-500 group-hover:fill-yellow-400 group-hover:fill-opacity-30" d="M12 2l2.5 5.5L20 8.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <circle className="transition-all duration-700 group-hover:r-4 group-hover:animate-pulse" cx="12" cy="9" r="3" fill="none" stroke="currentColor" strokeWidth="2"/>
+    <path className="transition-all duration-300 group-hover:translate-y-1" d="M9 18.5l3 2 3-2v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="currentColor" fillOpacity="0.3"/>
+    <circle className="transition-all duration-500 group-hover:fill-yellow-500" cx="12" cy="9" r="1.5" fill="currentColor"/>
   </svg>
 );
 
@@ -296,11 +309,13 @@ export const UserCheckIcon = ({className = "w-6 h-6"}: {className?: string}) => 
 );
 
 export const CalendarIcon = ({className = "w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    <line x1="16" x2="16" y1="2" y2="6" />
-    <line x1="8" x2="8" y1="2" y2="6" />
-    <line x1="3" x2="21" y1="10" y2="10" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 group`}>
+    <line className="transition-all duration-700 group-hover:stroke-blue-500" x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2"/>
+    <circle className="transition-all duration-300 group-hover:r-3 group-hover:fill-blue-500" cx="6" cy="12" r="2" fill="currentColor" fillOpacity="0.5"/>
+    <circle className="transition-all duration-500 group-hover:r-3 group-hover:fill-purple-500" cx="12" cy="12" r="2.5" fill="currentColor" fillOpacity="0.7"/>
+    <circle className="transition-all duration-700 group-hover:r-4 group-hover:animate-pulse group-hover:fill-green-500" cx="18" cy="12" r="3" fill="currentColor"/>
+    <path className="transition-all duration-500 group-hover:-translate-y-1" d="M6 8v4M12 7v5M18 6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+    <path className="transition-all duration-500 group-hover:translate-y-1" d="M6 12v4M12 12v5M18 12v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
   </svg>
 );
 
@@ -318,19 +333,21 @@ export const BellIcon = ({className = "w-6 h-6"}: {className?: string}) => (
 );
 
 export const VideoCameraIcon = ({className="w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m22 8-6 4 6 4V8Z" />
-    <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 group`}>
+    <rect className="transition-all duration-300 group-hover:fill-red-500 group-hover:fill-opacity-20" x="2" y="5" width="15" height="14" rx="3" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path className="transition-all duration-500 group-hover:translate-x-1" d="M17 9.5l5-2.5v10l-5-2.5z" fill="currentColor"/>
+    <circle className="transition-all duration-700 group-hover:animate-pulse" cx="9.5" cy="12" r="2.5" fill="currentColor" fillOpacity="0.3"/>
+    <circle className="transition-all duration-500 group-hover:r-1" cx="9.5" cy="12" r="0" fill="#EF4444"/>
   </svg>
 );
 
 export const SparklesIcon = ({className="w-5 h-5"}: {className?: string}) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-    <path d="M5 3v4" />
-    <path d="M9 5H5" />
-    <path d="M19 19v4" />
-    <path d="M19 19h-4" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:-translate-y-1 group`}>
+    <path className="transition-all duration-500 group-hover:fill-yellow-400 group-hover:fill-opacity-30" d="M12 2c-2.5 0-4.5 2-4.5 4.5 0 2.2 1.5 4 3.5 4.5v2c0 .55.45 1 1 1s1-.45 1-1v-2c2-.5 3.5-2.3 3.5-4.5C16.5 4 14.5 2 12 2z" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <path className="transition-all duration-700 group-hover:translate-y-0.5" d="M9 15h6v1.5c0 .8-.7 1.5-1.5 1.5h-3c-.8 0-1.5-.7-1.5-1.5V15z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <line className="transition-all duration-300 group-hover:stroke-yellow-500" x1="12" y1="19" x2="12" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle className="transition-all duration-500 group-hover:r-1.5 group-hover:animate-pulse group-hover:fill-yellow-500" cx="12" cy="6.5" r="1" fill="currentColor"/>
+    <path className="transition-all duration-700 group-hover:opacity-100" opacity="0" d="M6 6l-2-2M18 6l2-2M18 10l2 2M6 10l-2 2" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -349,8 +366,11 @@ export const LockClosedIcon = ({ className = "w-5 h-5" }: { className?: string }
 );
 
 export const ChatBubbleIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:-translate-y-1 group`}>
+    <path className="transition-all duration-500 group-hover:fill-current group-hover:fill-opacity-20" d="M12 3C7 3 3 6.6 3 11c0 2.2 1 4.2 2.6 5.6L4 21l4.5-1.6c1 .4 2.2.6 3.5.6 5 0 9-3.6 9-8s-4-9-9-9z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle className="transition-all duration-300 group-hover:r-1 group-hover:animate-pulse" cx="8" cy="11" r="0.5" fill="currentColor"/>
+    <circle className="transition-all duration-400 group-hover:r-1 group-hover:animate-pulse" cx="12" cy="11" r="0.5" fill="currentColor"/>
+    <circle className="transition-all duration-500 group-hover:r-1 group-hover:animate-pulse" cx="16" cy="11" r="0.5" fill="currentColor"/>
   </svg>
 );
 
@@ -367,21 +387,21 @@ export const ChevronRightIcon = ({ className = "w-5 h-5" }: { className?: string
 );
 
 export const TargetIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="6" />
-    <circle cx="12" cy="12" r="2" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-500 hover:scale-110 hover:rotate-90 group`}>
+    <path className="transition-all duration-700 group-hover:opacity-50" d="M3 3h7v7H3z" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path className="transition-all duration-500" d="M14 3h7v7h-7z" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path className="transition-all duration-500" d="M3 14h7v7H3z" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <rect className="transition-all duration-300 group-hover:fill-current" x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.3"/>
+    <circle className="transition-all duration-700 group-hover:animate-ping" cx="17.5" cy="17.5" r="2" fill="currentColor" fillOpacity="0.5"/>
   </svg>
 );
 
 export const ReportsIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-    <polyline points="14 2 14 8 20 8" />
-    <path d="M8 13h2" />
-    <path d="M8 17h2" />
-    <path d="M14 13h2" />
-    <path d="M14 17h2" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:-translate-y-1 group`}>
+    <rect className="transition-all duration-500 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-30" x="6" y="6" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.1"/>
+    <rect className="transition-all duration-300 group-hover:translate-x-0.5" x="4" y="4" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="2" fill="white"/>
+    <path className="transition-all duration-700 group-hover:stroke-blue-500" d="M8 10h6M8 13h4M8 16h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle className="transition-all duration-500 group-hover:r-1 group-hover:animate-pulse" cx="15" cy="8" r="0" fill="#3B82F6"/>
   </svg>
 );
 
@@ -418,8 +438,10 @@ export const UploadIcon = ({ className = "w-5 h-5" }: { className?: string }) =>
 );
 
 export const BoltIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-125 hover:rotate-6 group`}>
+    <path className="transition-all duration-500 group-hover:fill-yellow-400 group-hover:animate-pulse" d="M13 2l-2 9h6l-8 11 2-9H5l8-11z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle className="transition-all duration-700 group-hover:r-14 group-hover:animate-ping" cx="12" cy="12" r="0" fill="#FBBF24" fillOpacity="0.2"/>
+    <path className="transition-all duration-300 group-hover:opacity-100" opacity="0" d="M12 2v3M12 19v3M4 12h3M17 12h3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -447,15 +469,21 @@ export const BuildingOfficeIcon = ({ className = "w-5 h-5" }: { className?: stri
 );
 
 export const HeadphonesIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 hover:rotate-12 group`}>
+    <circle className="transition-all duration-500 group-hover:stroke-blue-500" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <circle className="transition-all duration-700 group-hover:r-10 group-hover:animate-ping" cx="12" cy="12" r="0" stroke="#3B82F6" strokeWidth="2" fill="none" opacity="0.3"/>
+    <path className="transition-all duration-300 group-hover:fill-blue-500" d="M12 8c-1.1 0-2 .9-2 2h1c0-.55.45-1 1-1s1 .45 1 1c0 1-1.5 1-1.5 2.5h1c0-1 1.5-1 1.5-2.5 0-1.1-.9-2-2-2z" fill="currentColor"/>
+    <circle className="transition-all duration-500 group-hover:r-1.5 group-hover:animate-pulse" cx="12" cy="15" r="1" fill="currentColor"/>
+    <path className="transition-all duration-700 group-hover:opacity-100" opacity="0" d="M8 4l-2-2M16 4l2-2M20 12h2M2 12h2M8 20l-2 2M16 20l2 2" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
 export const FireIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.6-3a1 1 0 0 1 1.9 1.5Z" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-110 group`}>
+    <path className="transition-all duration-700 group-hover:fill-orange-500 group-hover:animate-pulse" d="M12 2C12 2 8 6 8 10c0 2.2 1.8 4 4 4s4-1.8 4-4c0-4-4-8-4-8z" fill="#F97316" fillOpacity="0.3" stroke="#F97316" strokeWidth="2"/>
+    <path className="transition-all duration-500 group-hover:fill-red-500" d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#EF4444" fillOpacity="0.5"/>
+    <ellipse className="transition-all duration-500 group-hover:ry-8" cx="12" cy="17" rx="6" ry="5" fill="#F97316" fillOpacity="0.2" stroke="#F97316" strokeWidth="2"/>
+    <circle className="transition-all duration-700 group-hover:r-8 group-hover:animate-ping" cx="12" cy="12" r="0" fill="#FBBF24" fillOpacity="0.3"/>
   </svg>
 );
 
@@ -512,8 +540,10 @@ export const EnvelopeIcon = ({ className = "w-5 h-5" }: { className?: string }) 
 );
 
 export const StarIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={`${className} transition-all duration-300 hover:scale-125 hover:rotate-12 group`}>
+    <path className="transition-all duration-500 group-hover:fill-yellow-400 group-hover:fill-opacity-90" d="M12 2l2.5 5.5L20 8.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <circle className="transition-all duration-700 group-hover:r-14 group-hover:animate-ping" cx="12" cy="12" r="0" fill="#FBBF24" fillOpacity="0.2"/>
+    <path className="transition-all duration-300 group-hover:opacity-100" opacity="0" d="M12 1v3M12 20v3M3 12h3M18 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
