@@ -1,0 +1,7 @@
+{
+  "name": "Poisé",
+  "description": "Poisé is your personal AI wellness coach, helping you build healthier habits for a pain-free future using real-time feedback, historical analysis, and personalized tips from Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
