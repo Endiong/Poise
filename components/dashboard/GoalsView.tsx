@@ -69,7 +69,7 @@ const GoalsView: React.FC<GoalsViewProps> = ({
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-4 mb-4">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-100 rounded-xl text-emerald-600 dark:text-emerald-600">
                 <TargetIcon className="w-6 h-6" />
                 </div>
                 <div>
@@ -104,7 +104,7 @@ const GoalsView: React.FC<GoalsViewProps> = ({
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-4 mb-4">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
+                <div className="p-2 bg-purple-100 dark:bg-purple-100 rounded-xl text-purple-600 dark:text-purple-600">
                 <ClockIcon className="w-6 h-6" />
                 </div>
                 <div>
@@ -138,7 +138,7 @@ const GoalsView: React.FC<GoalsViewProps> = ({
         {/* Sensitivity Area */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 md:col-span-2">
             <div className="flex items-center gap-4 mb-4">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                <div className="p-2 bg-blue-100 dark:bg-blue-100 rounded-xl text-blue-600 dark:text-blue-600">
                   <UserCheckIcon className="w-6 h-6" />
                 </div>
                 <div>

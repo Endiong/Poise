@@ -42,7 +42,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ theme, data, goal = 80 
                 <span className="text-sm font-medium text-gray-500">avg</span>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-bold ${isImproving ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+          <div className={`px-3 py-1 rounded-full text-xs font-bold ${isImproving ? 'bg-green-100 text-green-700 dark:bg-green-100 dark:text-green-700' : 'bg-orange-100 text-orange-700 dark:bg-orange-100 dark:text-orange-700'}`}>
               {isImproving ? '+ Improving' : 'Needs Focus'}
           </div>
       </div>

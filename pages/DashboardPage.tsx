@@ -18,14 +18,23 @@ import { ViewType, PostureHistoryItem, LayoutMode, PostureStatus } from '../type
 import Chatbot from '../components/dashboard/Chatbot';
 import { getPostureTip } from '../services/geminiService';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchUserSessions, DbSession } from '../utils/supabaseClient';
+import { 
+  fetchUserSessions, 
+  DbSession,
+  getUserPreferences,
+  upsertUserPreferences,
+  getUserBadges,
+  awardBadge,
+  upsertDailyGoal
+} from '../utils/supabaseClient';
 import { 
   HomeIcon, VideoCameraIcon, SettingsIcon, LogoutIcon, 
   ClockIcon, CheckBadgeIcon, 
   MoonIcon, SunIcon, PoiséIcon, ChevronDownIcon,
   ChatBubbleIcon, HeadphonesIcon,
   BoltIcon, FireIcon, ReportsIcon, ChartBarSquareIcon,
-  TargetIcon, CloseIcon, UserCircleIcon, SparklesIcon, InfoCircleIcon
+  TargetIcon, CloseIcon, UserCircleIcon, SparklesIcon, InfoCircleIcon,
+  CalendarIcon, UserCheckIcon
 } from '../components/icons/Icons';
 import { loadState, saveState } from '../utils/storage';
 
@@ -88,17 +97,29 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     };
   });
   
-  const [dailyGoal, setDailyGoal] = useState<number>(() => loadState(GOAL_STORAGE_KEY) || 60); 
-  const [dailySessionGoal, setDailySessionGoal] = useState<number>(() => loadState(SESSION_GOAL_STORAGE_KEY) || 2); 
-  const [sensitivity, setSensitivity] = useState<string>(() => loadState(FOCUS_AREA_STORAGE_KEY) || 'Medium');
+  const [dailyGoal, setDailyGoal] = useState<number>(60); // Will be loaded from database
+  const [dailySessionGoal, setDailySessionGoal] = useState<number>(2); // Will be loaded from database
+  const [sensitivity, setSensitivity] = useState<string>('Medium'); // Will be loaded from database
 
   const [history, setHistory] = useState<PostureHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(() => loadState(ONBOARDING_COMPLETED_KEY) || false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(() => {
+    // Only trust database (user_metadata) for onboarding state
+    // New users will have undefined, which means they haven't completed onboarding
+    return user?.user_metadata?.onboarding_completed === true;
+  });
   const [lastTip, setLastTip] = useState<string>(() => loadState(LATEST_TIP_KEY) || "Align your ears with your shoulders.");
   
-  // Badge State
-  const [unlockedBadges, setUnlockedBadges] = useState<string[]>(() => loadState(BADGES_KEY) || ['onboarding_explorer']);
+  // Badge State - Load from user_metadata first
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>(() => {
+    if (user?.user_metadata?.unlocked_badges) {
+      return user.user_metadata.unlocked_badges;
+    }
+    // Only give onboarding_explorer if onboarding is actually completed
+    const storedBadges = loadState<string[]>(BADGES_KEY);
+    if (storedBadges) return storedBadges;
+    return [];
+  });
   const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<{name: string, desc: string, icon: React.ReactNode} | null>(null);
 
   const [isTracking, setIsTracking] = useState(false);
@@ -108,17 +129,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   // PERSISTENT VIDEO REF for AI Model
   const hiddenVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Fetch sessions from Supabase on mount
+  // Fetch sessions, preferences, and badges from Supabase on mount
   useEffect(() => {
-    const loadSessions = async () => {
+    const loadUserData = async () => {
       if (!user) {
         setIsLoadingHistory(false);
         return;
       }
       
       try {
+        // Load sessions
         const sessions = await fetchUserSessions(user.id);
-        // Convert DbSession to PostureHistoryItem format
         const historyItems: PostureHistoryItem[] = sessions.map((s: DbSession) => ({
           date: s.created_at,
           duration: s.duration,
@@ -127,8 +148,42 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
           leanDuration: s.lean_duration,
         }));
         setHistory(historyItems);
+
+        // Load user preferences from database
+        const prefs = await getUserPreferences(user.id);
+        if (prefs) {
+          setDailyGoal(prefs.daily_goal);
+          setDailySessionGoal(prefs.session_goal);
+          setSensitivity(prefs.sensitivity);
+          // Keep localStorage as cache
+          saveState(GOAL_STORAGE_KEY, prefs.daily_goal);
+          saveState(SESSION_GOAL_STORAGE_KEY, prefs.session_goal);
+          saveState(FOCUS_AREA_STORAGE_KEY, prefs.sensitivity);
+        } else {
+          // Create default preferences in database
+          await upsertUserPreferences(user.id, dailyGoal, dailySessionGoal, sensitivity);
+        }
+
+        // Load badges from database
+        const badges = await getUserBadges(user.id);
+        if (badges.length > 0) {
+          const badgeIds = badges.map(b => b.badge_id);
+          setUnlockedBadges(badgeIds);
+          saveState(BADGES_KEY, badgeIds);
+        } else if (user.user_metadata?.unlocked_badges) {
+          // Migrate from user_metadata to database
+          const oldBadges = user.user_metadata.unlocked_badges;
+          setUnlockedBadges(oldBadges);
+          // Award each badge in the database
+          for (const badgeId of oldBadges) {
+            const badgeInfo = getBadgeInfo(badgeId);
+            if (badgeInfo) {
+              await awardBadge(user.id, badgeId, badgeInfo.name);
+            }
+          }
+        }
       } catch (error) {
-        console.error('Failed to load sessions:', error);
+        console.error('Failed to load user data:', error);
         // Fall back to localStorage if Supabase fails
         const localHistory = loadState<PostureHistoryItem[]>(HISTORY_STORAGE_KEY) || [];
         setHistory(localHistory);
@@ -137,10 +192,30 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
       }
     };
     
-    loadSessions();
+    loadUserData();
   }, [user]);
 
-  // Sync profile, theme, and layout with user metadata when user changes
+  // Helper function to get badge information
+  const getBadgeInfo = (badgeId: string): { name: string; desc: string } | null => {
+    const badgeMap: Record<string, { name: string; desc: string }> = {
+      onboarding_explorer: { name: 'Onboarding Explorer', desc: 'Completed onboarding' },
+      first_steps: { name: 'First Steps', desc: 'First tracking session' },
+      on_fire: { name: 'On Fire', desc: '3-day streak' },
+      week_streak: { name: 'Week Streak', desc: '7-day streak' },
+      monthly_master: { name: 'Monthly Master', desc: '30-day streak' },
+      goal_crusher: { name: 'Goal Crusher', desc: 'Hit goal 5 times' },
+      weekend_warrior: { name: 'Weekend Warrior', desc: 'Weekend tracking' },
+      marathoner: { name: 'Marathoner', desc: '4+ hour session' },
+      perfectionist: { name: 'Perfectionist', desc: '95%+ score for 1hr' },
+      early_bird: { name: 'Early Bird', desc: 'Session before 8 AM' },
+      night_owl: { name: 'Night Owl', desc: 'Session after 8 PM' },
+      posture_pro: { name: 'Posture Pro', desc: '100 hours tracked' },
+      zen_master: { name: 'Zen Master', desc: 'Perfect 2hr session' },
+    };
+    return badgeMap[badgeId] || null;
+  };
+
+  // Sync profile, theme, layout, badges, and onboarding with user metadata when user changes
   useEffect(() => {
     if (user) {
       // Update profile
@@ -159,61 +234,224 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
       if (user.user_metadata?.nav_layout) {
         setLayoutMode(user.user_metadata.nav_layout as LayoutMode);
       }
+      
+      // Sync badges from user_metadata
+      if (user.user_metadata?.unlocked_badges) {
+        setUnlockedBadges(user.user_metadata.unlocked_badges);
+        saveState(BADGES_KEY, user.user_metadata.unlocked_badges);
+      }
+      
+      // Sync onboarding state from user_metadata (database is source of truth)
+      setHasCompletedOnboarding(user.user_metadata?.onboarding_completed === true);
     }
   }, [user]);
 
   // Helper to check for new badges based on updated history
-  const checkBadges = (currentHistory: PostureHistoryItem[], currentBadges: string[]) => {
-      const newBadges: string[] = [];
-      let latestBadgeInfo = null;
+  const checkBadges = async (currentHistory: PostureHistoryItem[], currentBadges: string[]) => {
+      const newBadges: { id: string; info: { name: string; desc: string; icon: React.ReactNode } }[] = [];
 
-      // 1. First Steps
-      if (currentHistory.length >= 1 && !currentBadges.includes('first_steps')) {
-          newBadges.push('first_steps');
-          latestBadgeInfo = { name: 'First Steps', desc: 'Completed your first session!', icon: <VideoCameraIcon /> };
+      // 1. First Steps - Complete your first tracking session
+      if (currentHistory.length === 1 && !currentBadges.includes('first_steps')) {
+          newBadges.push({ 
+            id: 'first_steps', 
+            info: { name: 'First Steps', desc: 'Completed your first session!', icon: <VideoCameraIcon /> }
+          });
       }
 
-      // 2. Marathoner
       const lastSession = currentHistory[0];
-      if (lastSession && lastSession.duration > 4 * 3600 && !currentBadges.includes('marathoner')) {
-          newBadges.push('marathoner');
-          latestBadgeInfo = { name: 'Marathoner', desc: 'Tracked for over 4 hours!', icon: <ClockIcon /> };
+      
+      // 2. Marathoner - Track for 4 hours in one day
+      if (lastSession && lastSession.duration >= 4 * 3600 && !currentBadges.includes('marathoner')) {
+          newBadges.push({ 
+            id: 'marathoner', 
+            info: { name: 'Marathoner', desc: 'Tracked for over 4 hours!', icon: <ClockIcon /> }
+          });
       }
 
-      // 3. Perfectionist
-      if (lastSession) {
+      // 3. Perfectionist - Maintain 95% score for 1 hour
+      if (lastSession && lastSession.duration >= 3600) {
           const score = (lastSession.goodDuration / lastSession.duration) * 100;
-          if (score >= 95 && lastSession.duration > 3600 && !currentBadges.includes('perfectionist')) {
-              newBadges.push('perfectionist');
-              latestBadgeInfo = { name: 'Perfectionist', desc: 'Maintained 95% posture for 1 hour!', icon: <SparklesIcon /> };
+          if (score >= 95 && !currentBadges.includes('perfectionist')) {
+              newBadges.push({ 
+                id: 'perfectionist', 
+                info: { name: 'Perfectionist', desc: 'Maintained 95% posture for 1 hour!', icon: <SparklesIcon /> }
+              });
           }
       }
 
-      // 4. On Fire
-      if (!currentBadges.includes('on_fire')) {
-          const uniqueDates = new Set(currentHistory.map(h => new Date(h.date).toDateString()));
-          if (uniqueDates.size >= 3) {
-               newBadges.push('on_fire');
-               latestBadgeInfo = { name: 'On Fire', desc: 'Reached a 3-day streak!', icon: <FireIcon /> };
+      // Calculate unique tracking dates for streak-based badges
+      const uniqueDates = Array.from(new Set(
+        currentHistory.map(h => new Date(h.date).toDateString())
+      )).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+      
+      // 4. On Fire - Reach a 3-day streak
+      if (uniqueDates.length >= 3 && !currentBadges.includes('on_fire')) {
+          // Verify it's actually a streak (consecutive days)
+          const streak = calculateStreak(uniqueDates);
+          if (streak >= 3) {
+              newBadges.push({ 
+                id: 'on_fire', 
+                info: { name: 'On Fire', desc: 'Reached a 3-day streak!', icon: <FireIcon /> }
+              });
           }
       }
 
-      if (newBadges.length > 0) {
-          const updatedBadges = [...currentBadges, ...newBadges];
+      // 5. Week Streak - Maintain a 7-day active streak
+      if (uniqueDates.length >= 7 && !currentBadges.includes('week_streak')) {
+          const streak = calculateStreak(uniqueDates);
+          if (streak >= 7) {
+              newBadges.push({ 
+                id: 'week_streak', 
+                info: { name: 'Week Streak', desc: 'Maintained a 7-day streak!', icon: <FireIcon /> }
+              });
+          }
+      }
+
+      // 6. Monthly Master - Reach a 30-day streak
+      if (uniqueDates.length >= 30 && !currentBadges.includes('monthly_master')) {
+          const streak = calculateStreak(uniqueDates);
+          if (streak >= 30) {
+              newBadges.push({ 
+                id: 'monthly_master', 
+                info: { name: 'Monthly Master', desc: 'Reached a 30-day streak!', icon: <FireIcon /> }
+              });
+          }
+      }
+
+      // 7. Goal Crusher - Hit your daily goal 5 times
+      if (!currentBadges.includes('goal_crusher')) {
+          const goalMetCount = currentHistory.filter(h => {
+              const score = (h.goodDuration / h.duration) * 100;
+              return score >= dailyGoal;
+          }).length;
+          if (goalMetCount >= 5) {
+              newBadges.push({ 
+                id: 'goal_crusher', 
+                info: { name: 'Goal Crusher', desc: 'Hit your daily goal 5 times!', icon: <TargetIcon /> }
+              });
+          }
+      }
+
+      // 8. Weekend Warrior - Track on Saturday and Sunday
+      if (!currentBadges.includes('weekend_warrior')) {
+          const hasSaturday = currentHistory.some(h => new Date(h.date).getDay() === 6);
+          const hasSunday = currentHistory.some(h => new Date(h.date).getDay() === 0);
+          if (hasSaturday && hasSunday) {
+              newBadges.push({ 
+                id: 'weekend_warrior', 
+                info: { name: 'Weekend Warrior', desc: 'Tracked on Saturday and Sunday!', icon: <CalendarIcon /> }
+              });
+          }
+      }
+
+      // 9. Early Bird - Complete a session before 8 AM
+      if (!currentBadges.includes('early_bird')) {
+          const hasEarlySession = currentHistory.some(h => new Date(h.date).getHours() < 8);
+          if (hasEarlySession) {
+              newBadges.push({ 
+                id: 'early_bird', 
+                info: { name: 'Early Bird', desc: 'Completed a session before 8 AM!', icon: <CheckBadgeIcon /> }
+              });
+          }
+      }
+
+      // 10. Night Owl - Complete a session after 8 PM
+      if (!currentBadges.includes('night_owl')) {
+          const hasLateSession = currentHistory.some(h => new Date(h.date).getHours() >= 20);
+          if (hasLateSession) {
+              newBadges.push({ 
+                id: 'night_owl', 
+                info: { name: 'Night Owl', desc: 'Completed a session after 8 PM!', icon: <CheckBadgeIcon /> }
+              });
+          }
+      }
+
+      // 11. Posture Pro - Log 100 total hours of tracking
+      if (!currentBadges.includes('posture_pro')) {
+          const totalHours = currentHistory.reduce((sum, h) => sum + h.duration, 0) / 3600;
+          if (totalHours >= 100) {
+              newBadges.push({ 
+                id: 'posture_pro', 
+                info: { name: 'Posture Pro', desc: 'Logged 100 total hours!', icon: <UserCheckIcon /> }
+              });
+          }
+      }
+
+      // 12. Zen Master - 0 Slouch events in a 2hr session
+      if (lastSession && lastSession.duration >= 7200 && !currentBadges.includes('zen_master')) {
+          if (lastSession.slouchDuration === 0 && lastSession.leanDuration === 0) {
+              newBadges.push({ 
+                id: 'zen_master', 
+                info: { name: 'Zen Master', desc: 'Perfect posture for 2 hours!', icon: <BoltIcon /> }
+              });
+          }
+      }
+
+      // If any new badges were earned, update state and sync to database
+      if (newBadges.length > 0 && user) {
+          const badgeIds = newBadges.map(b => b.id);
+          const updatedBadges = [...currentBadges, ...badgeIds];
+          
           setUnlockedBadges(updatedBadges);
           saveState(BADGES_KEY, updatedBadges);
-          if (latestBadgeInfo) {
-              setNewlyUnlockedBadge(latestBadgeInfo);
+          
+          // Award badges in database (not user_metadata anymore)
+          for (const badge of newBadges) {
+              await awardBadge(user.id, badge.id, badge.info.name);
           }
+          
+          // Show popup for the most recent badge (last one in array)
+          const latestBadge = newBadges[newBadges.length - 1];
+          setNewlyUnlockedBadge(latestBadge.info);
       }
   };
 
-  const handleSessionEnd = (session: PostureHistoryItem) => {
+  // Helper function to calculate actual consecutive streak
+  const calculateStreak = (sortedDates: string[]): number => {
+      if (sortedDates.length === 0) return 0;
+      
+      let streak = 1;
+      for (let i = 0; i < sortedDates.length - 1; i++) {
+          const current = new Date(sortedDates[i]);
+          const next = new Date(sortedDates[i + 1]);
+          const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+              streak++;
+          } else {
+              break;
+          }
+      }
+      return streak;
+  };
+
+  const handleSessionEnd = async (session: PostureHistoryItem) => {
     const newHistory = [session, ...history];
     setHistory(newHistory);
     // Keep localStorage as backup
     saveState(HISTORY_STORAGE_KEY, newHistory);
     checkBadges(newHistory, unlockedBadges);
+    
+    // Update daily goal progress in database
+    if (user) {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysSessions = newHistory.filter(h => 
+        new Date(h.date).toISOString().split('T')[0] === today
+      );
+      
+      const totalDuration = todaysSessions.reduce((sum, s) => sum + s.duration, 0);
+      const totalGood = todaysSessions.reduce((sum, s) => sum + s.goodDuration, 0);
+      const achievedPercentage = totalDuration > 0 ? Math.round((totalGood / totalDuration) * 100) : 0;
+      
+      await upsertDailyGoal(
+        user.id,
+        today,
+        dailyGoal,
+        achievedPercentage,
+        totalDuration,
+        todaysSessions.length
+      );
+    }
   };
 
   // HOOK NOW USES HIDDEN VIDEO REF with userId for Supabase
@@ -333,19 +571,31 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     }
   };
 
-  const handleSetGoal = (newGoal: number) => {
+  const handleSetGoal = async (newGoal: number) => {
       setDailyGoal(newGoal);
       saveState(GOAL_STORAGE_KEY, newGoal);
+      // Sync to database
+      if (user) {
+        await upsertUserPreferences(user.id, newGoal, undefined, undefined);
+      }
   };
 
-  const handleSetSessionGoal = (newGoal: number) => {
+  const handleSetSessionGoal = async (newGoal: number) => {
       setDailySessionGoal(newGoal);
       saveState(SESSION_GOAL_STORAGE_KEY, newGoal);
+      // Sync to database
+      if (user) {
+        await upsertUserPreferences(user.id, undefined, newGoal, undefined);
+      }
   };
   
-  const handleSetSensitivity = (level: string) => {
+  const handleSetSensitivity = async (level: string) => {
       setSensitivity(level);
       saveState(FOCUS_AREA_STORAGE_KEY, level);
+      // Sync to database
+      if (user) {
+        await upsertUserPreferences(user.id, undefined, undefined, level);
+      }
   }
 
   const handleUpdateLayout = async (mode: LayoutMode) => {
@@ -357,9 +607,27 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
       }
   };
 
-  const handleCompleteOnboarding = () => {
+  const handleCompleteOnboarding = async () => {
       setHasCompletedOnboarding(true);
-      saveState(ONBOARDING_COMPLETED_KEY, true);
+      
+      // Award onboarding badge if not already unlocked
+      if (!unlockedBadges.includes('onboarding_explorer') && user) {
+          const updatedBadges = [...unlockedBadges, 'onboarding_explorer'];
+          setUnlockedBadges(updatedBadges);
+          saveState(BADGES_KEY, updatedBadges);
+          
+          // Award badge in database
+          await awardBadge(user.id, 'onboarding_explorer', 'Onboarding Explorer');
+          
+          // Sync onboarding status to user_metadata (database is source of truth)
+          if (updateUserMetadata) {
+              await updateUserMetadata({ onboarding_completed: true });
+          }
+      } else if (user && updateUserMetadata) {
+          // Just sync onboarding state to database
+          await updateUserMetadata({ onboarding_completed: true });
+      }
+      
       setActiveView('home');
   };
 
@@ -616,9 +884,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
 
   // Streak Tooltip Content
   const StreakDisplay = ({ streak }: { streak: number }) => (
-      <div className="group relative flex items-center gap-1.5 px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-full cursor-help">
-          <FireIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-          <span className="text-sm font-bold text-orange-700 dark:text-orange-300">{streak}</span>
+      <div className="group relative flex items-center gap-1.5 px-3 py-1 bg-orange-100 dark:bg-orange-100 rounded-full cursor-help">
+          <FireIcon className="w-4 h-4 text-orange-600 dark:text-orange-600" />
+          <span className="text-sm font-bold text-orange-700 dark:text-orange-700">{streak}</span>
           
           {/* Tooltip */}
           <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-black text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
@@ -942,21 +1210,21 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
 
                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                                             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg flex items-center justify-center mb-3">
+                                             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-3">
                                                  <TargetIcon className="w-5 h-5" />
                                              </div>
                                              <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">1. Set Your Goal</h3>
                                              <p className="text-gray-500 text-xs">You've set a daily goal of {dailyGoal}% quality. Adjust in Goals tab.</p>
                                          </div>
                                          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                                             <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-lg flex items-center justify-center mb-3">
+                                             <div className="w-8 h-8 bg-green-100 dark:bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-3">
                                                  <VideoCameraIcon className="w-5 h-5" />
                                              </div>
                                              <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">2. Live Feedback</h3>
                                              <p className="text-gray-500 text-xs">Use the camera to get real-time corrections. We'll nudge you gently.</p>
                                          </div>
                                          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                                             <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg flex items-center justify-center mb-3">
+                                             <div className="w-8 h-8 bg-purple-100 dark:bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-3">
                                                  <ChartBarSquareIcon className="w-5 h-5" />
                                              </div>
                                              <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">3. View Insights</h3>
@@ -974,16 +1242,16 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                                             value={timeTrackedThisWeek.value} 
                                             unit={timeTrackedThisWeek.unit}
                                             trend={`${timeTrackedThisWeek.rawHours >= dailySessionGoal * 7 ? 'Goal Met' : `${Math.round((timeTrackedThisWeek.rawHours/(dailySessionGoal * 7))*100)}%`}`} 
-                                            icon={<ClockIcon className="w-6 h-6 text-blue-600 dark:text-blue-400"/>} 
-                                            iconBg="bg-blue-100 dark:bg-blue-900/30"
+                                            icon={<ClockIcon className="w-6 h-6 text-blue-600 dark:text-blue-600"/>} 
+                                            iconBg="bg-blue-100 dark:bg-blue-100"
                                         />
                                         <StatsCard 
                                             title="Current Posture" 
                                             value={isTracking ? postureStatus : 'Off'} 
                                             unit="" 
                                             trend={isTracking && postureStatus === 'Good Posture' ? 'Great' : '---'} 
-                                            icon={<CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-400"/>} 
-                                            iconBg="bg-green-100 dark:bg-green-900/30"
+                                            icon={<CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-600"/>} 
+                                            iconBg="bg-green-100 dark:bg-green-100"
                                         />
                                         <StatsCard 
                                             title="Goal Progress" 
@@ -994,8 +1262,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                                                 todayStats.score >= dailyGoal ? "Goal Met" : 
                                                 `${todayStats.score - dailyGoal}%`
                                             } 
-                                            icon={<TargetIcon className="w-6 h-6 text-purple-600 dark:text-purple-400"/>} 
-                                            iconBg="bg-purple-100 dark:bg-purple-900/30"
+                                            icon={<TargetIcon className="w-6 h-6 text-purple-600 dark:text-purple-600"/>} 
+                                            iconBg="bg-purple-100 dark:bg-purple-100"
                                         />
                                      </div>
 

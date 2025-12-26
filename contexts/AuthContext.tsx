@@ -68,6 +68,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       provider: 'google',
       options: {
         redirectTo: window.location.origin,
+        queryParams: {
+          prompt: 'select_account',
+        },
       },
     });
     return { error };
@@ -145,6 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setSession(null);
     setIsNewUser(false);
+    
+    // Clear all localStorage on logout to prevent data leakage between accounts
+    localStorage.clear();
   }, []);
 
   const clearNewUserFlag = useCallback(() => {

@@ -27,11 +27,11 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ history, isLoading = fa
 
   // 5-Tier Status Logic
   const getStatusConfig = (score: number) => {
-      if (score >= 90) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', barColor: 'bg-emerald-500', icon: <StarIcon className="w-3.5 h-3.5" /> };
-      if (score >= 80) return { label: 'Very Good', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', barColor: 'bg-blue-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
-      if (score >= 60) return { label: 'Good', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400', barColor: 'bg-indigo-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
-      if (score >= 40) return { label: 'Fair', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', barColor: 'bg-orange-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
-      return { label: 'Poor', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', barColor: 'bg-red-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
+      if (score >= 90) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-100 dark:text-emerald-700', barColor: 'bg-emerald-500', icon: <StarIcon className="w-3.5 h-3.5" /> };
+      if (score >= 80) return { label: 'Very Good', color: 'bg-blue-100 text-blue-700 dark:bg-blue-100 dark:text-blue-700', barColor: 'bg-blue-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
+      if (score >= 60) return { label: 'Good', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-100 dark:text-indigo-700', barColor: 'bg-indigo-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
+      if (score >= 40) return { label: 'Fair', color: 'bg-orange-100 text-orange-700 dark:bg-orange-100 dark:text-orange-700', barColor: 'bg-orange-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
+      return { label: 'Poor', color: 'bg-red-100 text-red-700 dark:bg-red-100 dark:text-red-700', barColor: 'bg-red-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
   };
 
   if (isLoading) {

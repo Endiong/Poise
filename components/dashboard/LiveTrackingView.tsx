@@ -54,17 +54,18 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-black rounded-xl p-4 text-white shadow-lg shadow-gray-900/20 relative overflow-hidden transition-all duration-500 flex items-center gap-4">
+      {/* Slimmer AI Coach Box */}
+      <div className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-black rounded-xl p-3 text-white shadow-lg shadow-gray-900/20 relative overflow-hidden transition-all duration-500 flex items-center gap-3">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-              <PoiséIcon className="w-16 h-16 transform translate-x-4 -translate-y-4" />
+              <PoiséIcon className="w-12 h-12 transform translate-x-4 -translate-y-4" />
           </div>
-          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
-              <PoiséIcon className="w-5 h-5 text-white" />
+          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
+              <PoiséIcon className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1 relative z-10">
               <div className="flex items-baseline gap-2">
-                  <span className="font-bold text-gray-400 text-[10px] uppercase tracking-wider">AI Coach</span>
-                  <p className="text-sm font-medium leading-tight">
+                  <span className="font-bold text-gray-400 text-[9px] uppercase tracking-wider">AI Coach</span>
+                  <p className="text-xs font-medium leading-tight">
                     {isTracking 
                         ? (isModelReady ? cleanTip(currentTip) : "Analyzing your posture patterns...") 
                         : "Start the camera to receive real-time, personalized posture correction tips."}
@@ -73,39 +74,44 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
           </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-        <div className="lg:col-span-2 w-full">
-          <CameraView
-            videoRef={uiVideoRef}
-            postureStatus={isModelReady ? postureStatus : PostureStatus.UNKNOWN}
-            onToggleCamera={onToggleTracking}
-            isCameraEnabled={isTracking}
-          />
+      {/* Responsive Grid - More square on larger screens */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start">
+        {/* Camera takes 2 columns on XL screens, more vertical aspect ratio */}
+        <div className="xl:col-span-2 w-full">
+          <div className="relative w-full" style={{ maxHeight: '70vh' }}>
+            <CameraView
+              videoRef={uiVideoRef}
+              postureStatus={isModelReady ? postureStatus : PostureStatus.UNKNOWN}
+              onToggleCamera={onToggleTracking}
+              isCameraEnabled={isTracking}
+            />
+          </div>
         </div>
+        {/* Stats column */}
         <div className="space-y-3 w-full">
           <StatsCard
             title="Session Score"
             value={totalSessionSeconds > 0 ? `${currentScore}%` : "--"}
             unit=""
             trend={totalSessionSeconds > 0 ? (currentScore >= 80 ? "Great" : "Improve") : "Ready"}
-            icon={<BoltIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />}
-            iconBg="bg-yellow-100 dark:bg-yellow-900/30"
+            icon={<BoltIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-600" />}
+            iconBg="bg-yellow-100 dark:bg-yellow-100"
           />
           <StatsCard
             title="Session Duration"
             value={formatTime(totalSessionSeconds)}
             unit="min"
             trend={isTracking ? "Active" : "Paused"}
-            icon={<ClockIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />}
-            iconBg="bg-blue-100 dark:bg-blue-900/30"
+            icon={<ClockIcon className="w-6 h-6 text-blue-600 dark:text-blue-600" />}
+            iconBg="bg-blue-100 dark:bg-blue-100"
           />
           <StatsCard
             title="Good Posture"
             value={formatTime(goodPostureSeconds)}
             unit="min"
             trend={`${totalSessionSeconds > 0 ? Math.round((goodPostureSeconds/totalSessionSeconds)*100) : 0}%`}
-            icon={<CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-400" />}
-            iconBg="bg-green-100 dark:bg-green-900/30"
+            icon={<CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-600" />}
+            iconBg="bg-green-100 dark:bg-green-100"
           />
         </div>
       </div>

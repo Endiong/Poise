@@ -68,7 +68,7 @@ const BadgesView: React.FC<BadgesViewProps> = ({ unlockedBadges }) => {
                             Locked
                         </div>
                     ) : (
-                        <div className="text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wide bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded-full">
+                        <div className="text-[8px] font-bold text-green-600 dark:text-green-600 uppercase tracking-wide bg-green-50 dark:bg-green-100 px-1.5 py-0.5 rounded-full">
                             Earned
                         </div>
                     )}

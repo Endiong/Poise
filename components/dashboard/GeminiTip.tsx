@@ -39,7 +39,7 @@ const ActivityItem: React.FC<{activity: Activity}> = ({ activity }) => {
                     <span className="font-semibold text-gray-800 dark:text-gray-200">{activity.title}</span>
                  </p>
                  <p className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</p>
-                 <div className={`mt-2 text-sm text-gray-700 dark:text-gray-300 ${activity.type === 'tip' ? 'bg-orange-50 dark:bg-orange-900/30 p-3 rounded-lg rounded-tl-none' : ''}`}>
+                 <div className={`mt-2 text-sm text-gray-700 dark:text-gray-300 ${activity.type === 'tip' ? 'bg-orange-50 dark:bg-orange-100 p-3 rounded-lg rounded-tl-none' : ''}`}>
                     {activity.description}
                 </div>
             </div>

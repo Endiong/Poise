@@ -127,7 +127,8 @@ const CameraView: React.FC<CameraViewProps> = ({ videoRef, postureStatus, onTogg
       <canvas ref={canvasRef} className="hidden" />
       <video ref={pipVideoRef} className="hidden" muted playsInline />
 
-      <div className="relative w-full bg-gray-900 dark:bg-black rounded-lg overflow-hidden mb-4 flex-1 max-h-[50vh] min-h-[300px] group">
+      {/* More vertical/square aspect ratio for better upper body view */}
+      <div className="relative w-full bg-gray-900 dark:bg-black rounded-lg overflow-hidden mb-4 flex-1 group" style={{ aspectRatio: '4/3', maxHeight: '70vh' }}>
         <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover transform -scale-x-100"></video>
         
         {/* Standard PiP Button */}
