@@ -11,13 +11,17 @@
   "dependencies": {
     "@google/genai": "^1.27.0",
     "@lordicon/react": "^1.11.0",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/pose": "^0.5.1675469404",
     "@supabase/supabase-js": "^2.89.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "lottie-web": "^5.13.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0",
+    "react-webcam": "^7.2.0",
     "recharts": "^3.6.0"
   },
   "devDependencies": {

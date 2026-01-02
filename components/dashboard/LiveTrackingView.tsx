@@ -4,6 +4,7 @@ import CameraView from './CameraView';
 import StatsCard from './StatsCard';
 import { BoltIcon, ClockIcon, CheckBadgeIcon, PoiséIcon } from '../icons/Icons';
 import { PostureStatus } from '../../types';
+import { NormalizedLandmark } from '@mediapipe/pose';
 
 interface LiveTrackingViewProps {
   stream: MediaStream | null;
@@ -14,6 +15,7 @@ interface LiveTrackingViewProps {
   totalSessionSeconds: number;
   currentTip: string;
   isModelReady: boolean;
+  poseLandmarks: NormalizedLandmark[] | null;
 }
 
 const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
@@ -24,7 +26,8 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
   goodPostureSeconds,
   totalSessionSeconds,
   currentTip,
-  isModelReady
+  isModelReady,
+  poseLandmarks
 }) => {
   // Local ref for the UI video element (visible to user)
   const uiVideoRef = useRef<HTMLVideoElement>(null);
@@ -32,11 +35,11 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
   // Sync the passed stream to the UI video element
   useEffect(() => {
     if (uiVideoRef.current) {
-        if (stream) {
-            uiVideoRef.current.srcObject = stream;
-        } else {
-            uiVideoRef.current.srcObject = null;
-        }
+      if (stream) {
+        uiVideoRef.current.srcObject = stream;
+      } else {
+        uiVideoRef.current.srcObject = null;
+      }
     }
   }, [stream]);
 
@@ -46,8 +49,8 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const currentScore = totalSessionSeconds > 0 
-    ? Math.min(100, Math.round((goodPostureSeconds / totalSessionSeconds) * 100)) 
+  const currentScore = totalSessionSeconds > 0
+    ? Math.min(100, Math.round((goodPostureSeconds / totalSessionSeconds) * 100))
     : 0;
 
   const cleanTip = (text: string) => text.replace(/\*\*/g, '').replace(/\*/g, '');
@@ -56,22 +59,22 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
     <div className="space-y-4">
       {/* Slimmer AI Coach Box */}
       <div className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-black rounded-xl p-3 text-white shadow-lg shadow-gray-900/20 relative overflow-hidden transition-all duration-500 flex items-center gap-3">
-          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-              <PoiséIcon className="w-12 h-12 transform translate-x-4 -translate-y-4" />
+        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+          <PoiséIcon className="w-12 h-12 transform translate-x-4 -translate-y-4" />
+        </div>
+        <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
+          <PoiséIcon className="w-4 h-4 text-white" />
+        </div>
+        <div className="flex-1 relative z-10">
+          <div className="flex items-baseline gap-2">
+            <span className="font-bold text-gray-400 text-[9px] uppercase tracking-wider">AI Coach</span>
+            <p className="text-xs font-medium leading-tight">
+              {isTracking
+                ? (isModelReady ? cleanTip(currentTip) : "Analyzing your posture patterns...")
+                : "Start the camera to receive real-time, personalized posture correction tips."}
+            </p>
           </div>
-          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg flex-shrink-0">
-              <PoiséIcon className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex-1 relative z-10">
-              <div className="flex items-baseline gap-2">
-                  <span className="font-bold text-gray-400 text-[9px] uppercase tracking-wider">AI Coach</span>
-                  <p className="text-xs font-medium leading-tight">
-                    {isTracking 
-                        ? (isModelReady ? cleanTip(currentTip) : "Analyzing your posture patterns...") 
-                        : "Start the camera to receive real-time, personalized posture correction tips."}
-                  </p>
-              </div>
-          </div>
+        </div>
       </div>
 
       {/* Responsive Grid - More square on larger screens */}
@@ -84,6 +87,7 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
               postureStatus={isModelReady ? postureStatus : PostureStatus.UNKNOWN}
               onToggleCamera={onToggleTracking}
               isCameraEnabled={isTracking}
+              poseLandmarks={poseLandmarks}
             />
           </div>
         </div>
@@ -109,7 +113,7 @@ const LiveTrackingView: React.FC<LiveTrackingViewProps> = ({
             title="Good Posture"
             value={formatTime(goodPostureSeconds)}
             unit="min"
-            trend={`${totalSessionSeconds > 0 ? Math.round((goodPostureSeconds/totalSessionSeconds)*100) : 0}%`}
+            trend={`${totalSessionSeconds > 0 ? Math.round((goodPostureSeconds / totalSessionSeconds) * 100) : 0}%`}
             icon={<CheckBadgeIcon className="w-6 h-6 text-green-600 dark:text-green-600" />}
             iconBg="bg-green-100 dark:bg-green-100"
           />
