@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import StatsCard from '../components/dashboard/StatsCard';
 import ActivityFeed from '../components/dashboard/GeminiTip';
@@ -60,8 +61,37 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, updateUserProfile, updateUserMetadata, updatePassword, refreshUser } = useAuth();
-  const [activeView, setActiveView] = useState<ViewType>('home');
+
+  // Derive activeView from URL path
+  const activeView = useMemo((): ViewType => {
+    const path = location.pathname.replace('/dashboard', '').replace('/', '');
+    if (!path || path === '') return 'home';
+    const viewMap: Record<string, ViewType> = {
+      'tracking': 'tracking',
+      'history': 'history',
+      'chat': 'chat',
+      'goals': 'goals',
+      'reports': 'reports',
+      'badges': 'badges',
+      'settings': 'settings',
+      'support': 'support',
+      'plans': 'plans',
+    };
+    return viewMap[path] || 'home';
+  }, [location.pathname]);
+
+  // Navigation helper
+  const setActiveView = useCallback((view: ViewType) => {
+    if (view === 'home') {
+      navigate('/dashboard');
+    } else {
+      navigate(`/dashboard/${view}`);
+    }
+  }, [navigate]);
+
   const [theme, setTheme] = useState<Theme>(() => {
     // Load theme from user_metadata or localStorage
     if (user?.user_metadata?.theme) {
@@ -731,7 +761,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     return values
       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
       .map(item => ({
-        date: item.dateObj.toLocaleDateString(undefined, { weekday: 'short' }),
+        date: item.dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
         score: Math.round(item.totalScore / item.count)
       }))
       .slice(-7); // Keep last 7 days
@@ -763,8 +793,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
 
     const latestDate = uniqueDates[0];
 
-    // If we haven't tracked today or yesterday, streak is broken (unless currently tracking)
-    if (latestDate !== todayStr && latestDate !== yesterdayStr && !isTracking) {
+    // Grace period: Allow up to 2 days gap before streak breaks
+    // If most recent tracking was more than 2 days ago, streak is broken
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    const twoDaysAgoStr = `${twoDaysAgo.getFullYear()}-${String(twoDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(twoDaysAgo.getDate()).padStart(2, '0')}`;
+
+    // If we haven't tracked in the last 2 days, streak is broken (unless currently tracking)
+    if (latestDate < twoDaysAgoStr && !isTracking) {
       return 0;
     }
 
@@ -776,7 +812,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
       const diffTime = Math.abs(expectedDate.getTime() - currentCheck.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays <= 1) {
+      // Allow up to 2 day gaps within the streak (grace period)
+      if (diffDays <= 2) {
         streak++;
         expectedDate = new Date(currentCheck);
         expectedDate.setDate(expectedDate.getDate() - 1);
