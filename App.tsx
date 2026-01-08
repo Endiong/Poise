@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import Header from './components/Header';
@@ -258,6 +259,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <AppContent />
+      <SpeedInsights />
     </AuthProvider>
   );
 };
