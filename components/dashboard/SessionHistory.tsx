@@ -27,11 +27,11 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ history, isLoading = fa
 
   // 5-Tier Status Logic
   const getStatusConfig = (score: number) => {
-      if (score >= 90) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-100 dark:text-emerald-700', barColor: 'bg-emerald-500', icon: <StarIcon className="w-3.5 h-3.5" /> };
-      if (score >= 80) return { label: 'Very Good', color: 'bg-blue-100 text-blue-700 dark:bg-blue-100 dark:text-blue-700', barColor: 'bg-blue-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
-      if (score >= 60) return { label: 'Good', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-100 dark:text-indigo-700', barColor: 'bg-indigo-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
-      if (score >= 40) return { label: 'Fair', color: 'bg-orange-100 text-orange-700 dark:bg-orange-100 dark:text-orange-700', barColor: 'bg-orange-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
-      return { label: 'Poor', color: 'bg-red-100 text-red-700 dark:bg-red-100 dark:text-red-700', barColor: 'bg-red-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
+    if (score >= 90) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-100 dark:text-emerald-700', barColor: 'bg-emerald-500', icon: <StarIcon className="w-3.5 h-3.5" /> };
+    if (score >= 80) return { label: 'Very Good', color: 'bg-blue-100 text-blue-700 dark:bg-blue-100 dark:text-blue-700', barColor: 'bg-blue-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
+    if (score >= 60) return { label: 'Good', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-100 dark:text-indigo-700', barColor: 'bg-indigo-500', icon: <CheckBadgeIcon className="w-3.5 h-3.5" /> };
+    if (score >= 40) return { label: 'Fair', color: 'bg-orange-100 text-orange-700 dark:bg-orange-100 dark:text-orange-700', barColor: 'bg-orange-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
+    return { label: 'Poor', color: 'bg-red-100 text-red-700 dark:bg-red-100 dark:text-red-700', barColor: 'bg-red-500', icon: <InfoCircleIcon className="w-3.5 h-3.5" /> };
   };
 
   if (isLoading) {
@@ -45,12 +45,25 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ history, isLoading = fa
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
-           <InfoCircleIcon className="w-8 h-8 text-gray-400" />
+      <div className="space-y-4">
+        {/* Info Notice about 3-minute requirement */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <InfoCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
+              <p className="font-semibold mb-1">Session Requirements</p>
+              <p>Sessions must be at least <span className="font-bold">3 minutes long</span> to be saved to your history and count towards your streak.</p>
+            </div>
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No history yet</h3>
-        <p className="max-w-xs mx-auto mt-1">Start a tracking session to see your progress recorded here.</p>
+
+        <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
+            <InfoCircleIcon className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No history yet</h3>
+          <p className="max-w-xs mx-auto mt-1">Start a tracking session to see your progress recorded here.</p>
+        </div>
       </div>
     );
   }
@@ -72,7 +85,7 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ history, isLoading = fa
               {history.map((session, idx) => {
                 const score = Math.round((session.goodDuration / session.duration) * 100);
                 const config = getStatusConfig(score);
-                
+
                 return (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">
@@ -84,8 +97,8 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ history, isLoading = fa
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-24 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all duration-500 ${config.barColor}`} 
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${config.barColor}`}
                             style={{ width: `${score}%` }}
                           />
                         </div>

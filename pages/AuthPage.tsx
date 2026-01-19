@@ -28,9 +28,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
     const handleGoogleLogin = async () => {
         setIsLoading(true);
         setError(null);
-        
+
         const { error } = await signInWithGoogle();
-        
+
         if (error) {
             setError(error.message);
             setIsLoading(false);
@@ -72,7 +72,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
             }
 
             const { error } = await signUpWithEmail(email, password, fullName.trim());
-            
+
             if (error) {
                 setError(error.message);
                 setIsLoading(false);
@@ -99,10 +99,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
             }
 
             const { error } = await signInWithEmail(email, password);
-            
+
             if (error) {
                 setError(error.message);
                 setIsLoading(false);
+            } else {
+                onLoginSuccess();
             }
         }
     };
@@ -118,14 +120,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
     return (
         <div className="min-h-screen flex flex-col bg-white overflow-y-auto">
             {/* Close button - fixed position */}
-            <button 
-                onClick={onBack} 
-                disabled={isLoading} 
+            <button
+                onClick={onBack}
+                disabled={isLoading}
                 className="fixed top-4 right-4 text-gray-500 hover:text-gray-800 z-50 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-gray-100 disabled:opacity-50 shadow-sm"
             >
                 <CloseIcon />
             </button>
-            
+
             <div className="flex-1 flex flex-col md:flex-row">
                 {/* Left decorative panel - Hidden on mobile */}
                 <div className="hidden md:flex md:w-1/2 flex-col justify-center items-center bg-indigo-50 p-8 relative">
@@ -140,16 +142,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                             <rect width="100%" height="100%" fill="url(#dot-pattern)" />
                         </svg>
                     </div>
-                    
+
                     {/* Abstract Spine Illustration */}
                     <svg viewBox="0 0 300 400" className="w-64 h-auto text-indigo-600 drop-shadow-xl z-10" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M150 50 C150 50 200 100 200 150 S150 250 150 250 S100 300 100 350" strokeLinecap="round" strokeLinejoin="round" className="opacity-50"/>
-                        <circle cx="150" cy="50" r="8" className="fill-white stroke-indigo-600" strokeWidth="3"/>
-                        <circle cx="200" cy="150" r="8" className="fill-white stroke-indigo-600" strokeWidth="3"/>
-                        <circle cx="150" cy="250" r="8" className="fill-white stroke-indigo-600" strokeWidth="3"/>
-                        <circle cx="100" cy="350" r="8" className="fill-white stroke-indigo-600" strokeWidth="3"/>
-                        <rect x="50" y="80" width="40" height="40" rx="8" stroke="#F59E0B" strokeWidth="2" className="opacity-80 animate-bounce" style={{animationDuration: '3s'}}/>
-                        <circle cx="250" cy="280" r="20" stroke="#10B981" strokeWidth="2" className="opacity-80 animate-pulse"/>
+                        <path d="M150 50 C150 50 200 100 200 150 S150 250 150 250 S100 300 100 350" strokeLinecap="round" strokeLinejoin="round" className="opacity-50" />
+                        <circle cx="150" cy="50" r="8" className="fill-white stroke-indigo-600" strokeWidth="3" />
+                        <circle cx="200" cy="150" r="8" className="fill-white stroke-indigo-600" strokeWidth="3" />
+                        <circle cx="150" cy="250" r="8" className="fill-white stroke-indigo-600" strokeWidth="3" />
+                        <circle cx="100" cy="350" r="8" className="fill-white stroke-indigo-600" strokeWidth="3" />
+                        <rect x="50" y="80" width="40" height="40" rx="8" stroke="#F59E0B" strokeWidth="2" className="opacity-80 animate-bounce" style={{ animationDuration: '3s' }} />
+                        <circle cx="250" cy="280" r="20" stroke="#10B981" strokeWidth="2" className="opacity-80 animate-pulse" />
                         <path d="M50 300 L80 330 L50 360" stroke="#EC4899" strokeWidth="2" fill="none" />
                     </svg>
                 </div>
@@ -183,7 +185,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                                 <p className="text-green-600 text-sm text-center">{successMessage}</p>
                             </div>
                         )}
-                        
+
                         {/* Email/Password Form */}
                         <form onSubmit={handleEmailSubmit} className="space-y-4">
                             {mode === 'signup' && (
@@ -300,11 +302,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                                 <span className="px-3 bg-white text-gray-500">or continue with</span>
                             </div>
                         </div>
-                        
+
                         {/* Google Sign In */}
-                        <button 
-                            onClick={handleGoogleLogin} 
-                            disabled={isLoading} 
+                        <button
+                            onClick={handleGoogleLogin}
+                            disabled={isLoading}
                             className="w-full inline-flex items-center justify-center py-2.5 sm:py-3 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                         >
                             {isLoading ? (
@@ -314,7 +316,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                                 </>
                             ) : (
                                 <>
-                                    <GoogleIcon /> 
+                                    <GoogleIcon />
                                     <span className="ml-3">Continue with Google</span>
                                 </>
                             )}
@@ -325,8 +327,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                             {mode === 'signup' ? (
                                 <>
                                     Already have an account?{' '}
-                                    <button 
-                                        onClick={switchMode} 
+                                    <button
+                                        onClick={switchMode}
                                         className="text-indigo-600 hover:text-indigo-800 font-semibold"
                                         disabled={isLoading}
                                     >
@@ -336,8 +338,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                             ) : (
                                 <>
                                     Don't have an account?{' '}
-                                    <button 
-                                        onClick={switchMode} 
+                                    <button
+                                        onClick={switchMode}
                                         className="text-indigo-600 hover:text-indigo-800 font-semibold"
                                         disabled={isLoading}
                                     >
@@ -346,12 +348,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode, onLoginSuccess, onSwitchMode,
                                 </>
                             )}
                         </p>
-                        
+
                         {/* Terms */}
                         <p className="mt-6 text-center text-xs text-gray-400 pb-4">
-                           By continuing, you agree to the Poisé{' '}
-                           <a href="#" className="underline hover:text-gray-600">Terms of Service</a> and{' '}
-                           <a href="#" className="underline hover:text-gray-600">Privacy Policy</a>.
+                            By continuing, you agree to the Poisé{' '}
+                            <a href="#" className="underline hover:text-gray-600">Terms of Service</a> and{' '}
+                            <a href="#" className="underline hover:text-gray-600">Privacy Policy</a>.
                         </p>
                     </div>
                 </div>

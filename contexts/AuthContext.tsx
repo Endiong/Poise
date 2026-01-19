@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Detect new user sign-up
         if (event === 'SIGNED_IN' && session?.user) {
           const createdAt = new Date(session.user.created_at);
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsNewUser(true);
           }
         }
-        
+
         setLoading(false);
       }
     );
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}/dashboard`,
         queryParams: {
           prompt: 'select_account',
         },
@@ -148,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setSession(null);
     setIsNewUser(false);
-    
+
     // Clear all localStorage on logout to prevent data leakage between accounts
     localStorage.clear();
   }, []);

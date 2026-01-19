@@ -101,6 +101,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Layout Preference State - Load from user_metadata first
@@ -110,6 +111,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     }
     return 'sidebar';
   });
+
+  const showSidebarDesktop = layoutMode === 'sidebar';
 
   const [profile, setProfile] = useState<UserProfile>(() => {
     // Use Supabase user data if available, otherwise fall back to localStorage
@@ -153,6 +156,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<{ name: string, desc: string, icon: React.ReactNode } | null>(null);
 
   const [isTracking, setIsTracking] = useState(false);
+  const [showCalibrationUI, setShowCalibrationUI] = useState(false);
   const [liveTip, setLiveTip] = useState<string>(lastTip);
   const [shouldAutoStart, setShouldAutoStart] = useState(false);
 
@@ -485,7 +489,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   };
 
   // HOOK NOW USES HIDDEN VIDEO REF with userId for Supabase
-  const { postureStatus, startCamera, stopCamera, goodPostureSeconds, totalSessionSeconds, isModelReady, activeStream, poseLandmarks } = usePostureTracker({
+  const { postureStatus, startCamera, stopCamera, calibrate, recalibrate, goodPostureSeconds, totalSessionSeconds, isModelReady, activeStream, poseLandmarks, isCalibrating, calibrationCountdown, sessionPaused } = usePostureTracker({
     onPostureChange: (status) => { },
     enabled: isTracking,
     onSessionEnd: handleSessionEnd,
@@ -500,6 +504,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
         if (!isTracking) {
           startCamera();
           setIsTracking(true);
+          setShowCalibrationUI(true);
         }
         setShouldAutoStart(false);
       }, 300);
@@ -541,17 +546,23 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     if (isTracking && isModelReady) {
       timeoutId = window.setTimeout(fetchTip, initialDelay);
     }
-
     return () => clearTimeout(timeoutId);
   }, [isTracking, isModelReady, postureStatus]);
+
+  const handleCalibrate = () => {
+    calibrate();
+    setShowCalibrationUI(false);
+  };
 
   const toggleTracking = () => {
     if (isTracking) {
       stopCamera();
       setIsTracking(false);
+      setShowCalibrationUI(false);
     } else {
       startCamera();
       setIsTracking(true);
+      setShowCalibrationUI(true);
     }
   };
 
@@ -903,7 +914,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
     }
   };
 
-  const showSidebarDesktop = layoutMode === 'sidebar';
+
 
   const AvatarPlaceholder = ({ className }: { className: string }) => (
     <div className={`${className} bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 overflow-hidden`}>
@@ -920,15 +931,21 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
   }
 
   // Streak Tooltip Content
-  const StreakDisplay = ({ streak }: { streak: number }) => (
-    <div className="group relative flex items-center gap-1.5 px-3 py-1 bg-orange-100 dark:bg-orange-100 rounded-full cursor-help">
+  const StreakDisplay = ({ streak, isLoading }: { streak: number, isLoading?: boolean }) => (
+    <div className={`group relative flex items-center gap-1.5 px-3 py-1 bg-orange-100 dark:bg-orange-100 rounded-full ${isLoading ? 'animate-pulse' : 'cursor-help'}`}>
       <FireIcon className="w-4 h-4 text-orange-600 dark:text-orange-600" />
-      <span className="text-sm font-bold text-orange-700 dark:text-orange-700">{streak}</span>
+      {isLoading ? (
+        <div className="h-4 w-4 bg-orange-300 rounded-sm"></div>
+      ) : (
+        <span className="text-sm font-bold text-orange-700 dark:text-orange-700">{streak}</span>
+      )}
 
       {/* Tooltip */}
-      <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-black text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-        <p>Track for at least 3 minutes to increase your streak.</p>
-      </div>
+      {!isLoading && (
+        <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-black text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+          <p>Track for at least 3 minutes to increase your streak.</p>
+        </div>
+      )}
     </div>
   );
 
@@ -965,7 +982,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <StreakDisplay streak={currentStreak} />
+          <StreakDisplay streak={currentStreak} isLoading={isLoadingHistory} />
 
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200">
             {isMobileMenuOpen ? <CloseIcon /> : (
@@ -1127,7 +1144,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
               <div className="flex-shrink-0 flex items-center gap-3">
                 {/* Top Navigation Streak */}
                 <div className="mr-2">
-                  <StreakDisplay streak={currentStreak} />
+                  <StreakDisplay streak={currentStreak} isLoading={isLoadingHistory} />
                 </div>
 
                 <button onClick={toggleTheme} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
@@ -1186,6 +1203,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
         {(showSidebarDesktop || isMobileMenuOpen === false) && (
           <header className={`flex justify-between items-center px-6 h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 dark:border-gray-800 ${!showSidebarDesktop ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-2">
+              {/* Expand Sidebar Button (when collapsed) */}
+              {!showSidebarDesktop && (
+                <button
+                  onClick={() => handleUpdateLayout('sidebar')}
+                  className="hidden md:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 hover:text-gray-900 dark:hover:text-white mr-2"
+                  title="Expand sidebar"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              )}
               <div className="animate-in fade-in slide-in-from-left-2">
                 <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">{getPageTitle(activeView)}</h1>
               </div>
@@ -1194,7 +1223,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
               {/* Desktop Sidebar Streak Indicator */}
               {showSidebarDesktop && (
                 <div className="hidden md:block mr-2">
-                  <StreakDisplay streak={currentStreak} />
+                  <StreakDisplay streak={currentStreak} isLoading={isLoadingHistory} />
                 </div>
               )}
 
@@ -1219,7 +1248,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                 </div>
 
                 {/* CONDITIONAL DASHBOARD CONTENT */}
-                {history.length === 0 ? (
+                {isLoadingHistory ? (
+                  /* LOADING SKELETON */
+                  <div className="space-y-6 animate-pulse">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-32 bg-gray-200 dark:bg-gray-800 rounded-xl"></div>
+                      ))}
+                    </div>
+                    <div className="h-[300px] bg-gray-200 dark:bg-gray-800 rounded-xl w-full"></div>
+                  </div>
+                ) : history.length === 0 ? (
                   /* NEW USER DASHBOARD VIEW */
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     {/* Significantly Compacted Getting Started Banner */}
@@ -1347,8 +1386,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onLogout }) => {
                 currentTip={liveTip}
                 isModelReady={isModelReady}
                 poseLandmarks={poseLandmarks}
+                showCalibrationUI={showCalibrationUI}
+                onCalibrate={handleCalibrate}
+                onRecalibrate={recalibrate}
+                calibrationCountdown={calibrationCountdown}
+                sessionPaused={sessionPaused}
               />
             )}
+
 
             {activeView === 'history' && <SessionHistory history={history} isLoading={isLoadingHistory} />}
 

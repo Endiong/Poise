@@ -19,6 +19,8 @@ const getStatusColor = (status: PostureStatus, isEnabled: boolean) => {
     case PostureStatus.SLOUCHING:
     case PostureStatus.LEANING:
       return 'bg-red-500';
+    case PostureStatus.NO_PERSON_DETECTED:
+      return 'bg-gray-500';
     case PostureStatus.IDLE:
       return 'bg-gray-400';
     default:
@@ -69,6 +71,9 @@ const CameraView: React.FC<CameraViewProps> = ({ videoRef, postureStatus, onTogg
         } else if (postureStatus === PostureStatus.LEANING) {
           barColor = 'rgba(239, 68, 68, 0.9)'; // Red
           statusText = 'LEANING DETECTED';
+        } else if (postureStatus === PostureStatus.NO_PERSON_DETECTED) {
+          barColor = 'rgba(107, 114, 128, 0.9)'; // Gray
+          statusText = 'NO PERSON DETECTED';
         } else if (postureStatus === PostureStatus.UNKNOWN) {
           barColor = 'rgba(234, 179, 8, 0.9)'; // Yellow
           statusText = 'ANALYZING...';

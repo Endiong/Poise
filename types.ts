@@ -4,8 +4,10 @@ export enum PostureStatus {
   SLOUCHING = 'Slouching Detected',
   LEANING = 'Leaning Detected',
   IDLE = 'Idle',
+  NO_PERSON_DETECTED = 'No Person Detected',
   UNKNOWN = 'Analyzing...',
 }
+
 
 export interface PostureDataPoint {
   time: string;
@@ -24,18 +26,18 @@ export type ViewType = 'home' | 'tracking' | 'history' | 'chat' | 'goals' | 'rep
 
 export type LayoutMode = 'sidebar' | 'top';
 
-export type AppView = 
-  | 'landing' 
-  | 'auth' 
-  | 'dashboard' 
-  | 'pricing' 
-  | 'guides' 
-  | 'support' 
-  | 'community' 
-  | 'blog' 
-  | 'build' 
-  | 'docs' 
-  | 'security' 
+export type AppView =
+  | 'landing'
+  | 'auth'
+  | 'dashboard'
+  | 'pricing'
+  | 'guides'
+  | 'support'
+  | 'community'
+  | 'blog'
+  | 'build'
+  | 'docs'
+  | 'security'
   | 'bug-bounty'
   | 'privacy'
   | 'terms'
